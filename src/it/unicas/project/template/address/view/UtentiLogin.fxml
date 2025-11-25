@@ -46,7 +46,6 @@
                     </children>
                 </GridPane>
 
-                <!-- Pulsante -->
                 <HBox alignment="CENTER" spacing="10">
                     <Button onAction="#handleLogin" text="Accedi" />
                     <Button onAction="#handleRegister" text="Registrati" />
