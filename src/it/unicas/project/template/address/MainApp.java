@@ -2,10 +2,14 @@ package it.unicas.project.template.address;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 import java.util.prefs.Preferences;
 
 import it.unicas.project.template.address.model.Utenti;
+import it.unicas.project.template.address.model.dao.DAOException;
+// IMPORTANTE: Qui importiamo la tua nuova classe DAOUtenti
+import it.unicas.project.template.address.model.dao.mysql.DAOUtenti;
 import it.unicas.project.template.address.model.dao.mysql.DAOMySQLSettings;
 import it.unicas.project.template.address.view.*;
 import javafx.application.Application;
@@ -36,12 +40,12 @@ public class MainApp extends Application {
     }
 
     /**
-     * The data as an observable list of Colleghis.
+     * The data as an observable list of Utenti.
      */
     private ObservableList<Utenti> colleghiData = FXCollections.observableArrayList();
 
     /**
-     * Returns the data as an observable list of Colleghis.
+     * Returns the data as an observable list of Utenti.
      * @return
      */
     public ObservableList<Utenti> getColleghiData() {
@@ -57,12 +61,40 @@ public class MainApp extends Application {
         primaryStage.getIcons().add(new Image("file:resources/images/App_Icon.png"));
 
         initRootLayout();
+
+        // --- CARICAMENTO DATI ALL'AVVIO ---
+        // Questo metodo scarica gli utenti dal DB e riempie la lista, così il login li trova
+        initData();
+        // ----------------------------------
+
         //showColleghiOverview();
         showUtentiLogin();
 
         primaryStage.show();
+    }
 
+    /**
+     * Metodo aggiunto per caricare i dati dal database e popolare la lista all'avvio.
+     * Usa la classe DAOUtenti.
+     */
+    public void initData() {
+        try {
+            // Recupera tutti gli utenti dal database usando DAOUtenti
+            List<Utenti> list = DAOUtenti.getInstance().select(null);
 
+            // Pulisce la lista locale e aggiunge quelli trovati nel DB
+            colleghiData.clear();
+            colleghiData.addAll(list);
+
+            System.out.println("InitData completato: " + colleghiData.size() + " utenti caricati dal database.");
+        } catch (DAOException e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Errore Database");
+            alert.setHeaderText("Impossibile caricare i dati");
+            alert.setContentText("Dettagli errore: " + e.getMessage());
+            alert.showAndWait();
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -111,13 +143,10 @@ public class MainApp extends Application {
         alert.getButtonTypes().setAll(buttonTypeOne, buttonTypeCancel);
 
         Optional<ButtonType> result = alert.showAndWait();
-        if (result.get() == buttonTypeOne){
+        if (result.isPresent() && result.get() == buttonTypeOne){
             System.exit(0);
         }
-
     }
-
-
 
     /**
      * Shows the Utenti overview inside the root layout.
@@ -140,7 +169,7 @@ public class MainApp extends Application {
         }
     }
 
-    //voglio un metodo che mostri la finestra di login
+    // Metodo che mostra la finestra di login
     public void showUtentiLogin(){
         try {
             FXMLLoader loader = new FXMLLoader();
@@ -156,7 +185,6 @@ public class MainApp extends Application {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
 
@@ -312,7 +340,6 @@ public class MainApp extends Application {
 
     public static void main(String[] args) {
         MainApp.launch(args);
-        //System.out.println("Finito");
     }
 }
 

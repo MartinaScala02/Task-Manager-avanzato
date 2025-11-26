@@ -2,7 +2,7 @@
 package it.unicas.project.template.address.view;
 
 import it.unicas.project.template.address.model.Utenti;
-import it.unicas.project.template.address.model.dao.mysql.ColleghiDAOMySQLImpl;
+import it.unicas.project.template.address.model.dao.mysql.DAOUtenti;
 import it.unicas.project.template.address.model.dao.DAOException;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -12,7 +12,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import it.unicas.project.template.address.MainApp;
-import it.unicas.project.template.address.util.DateUtil;
 import javafx.util.Callback;
 
 import java.util.List;
@@ -120,7 +119,7 @@ public class ColleghiOverviewController {
 
             Utenti colleghi = colleghiTableView.getItems().get(selectedIndex);
             try {
-                ColleghiDAOMySQLImpl.getInstance().delete(colleghi);
+                DAOUtenti.getInstance().delete(colleghi);
                 mainApp.getColleghiData().remove(selectedIndex);
                 //colleghiTableView.getItems().remove(selectedIndex);
             } catch (DAOException e) {
@@ -155,7 +154,7 @@ public class ColleghiOverviewController {
 
         if (okClicked) {
             try {
-                ColleghiDAOMySQLImpl.getInstance().insert(tempColleghi);
+                DAOUtenti.getInstance().insert(tempColleghi);
                 mainApp.getColleghiData().add(tempColleghi);
                 //colleghiTableView.getItems().add(tempColleghi);
             } catch (DAOException e) {
@@ -175,12 +174,12 @@ public class ColleghiOverviewController {
      */
     @FXML
     private void handleSearchColleghi() {
-        Utenti tempColleghi = new Utenti("","","", "", null);
+        Utenti tempColleghi = new Utenti("","","", "",  null);
         boolean okClicked = mainApp.showColleghiEditDialog(tempColleghi,false);
         if (okClicked) {
             //mainApp.getColleghiData().add(tempColleghi);
             try {
-                List<Utenti> list = ColleghiDAOMySQLImpl.getInstance().select(tempColleghi);
+                List<Utenti> list = DAOUtenti.getInstance().select(tempColleghi);
                 mainApp.getColleghiData().clear();
                 mainApp.getColleghiData().addAll(list);
             } catch (DAOException e) {
@@ -208,7 +207,7 @@ public class ColleghiOverviewController {
             boolean okClicked = mainApp.showColleghiEditDialog(selectedColleghi,true);
             if (okClicked) {
                 try {
-                    ColleghiDAOMySQLImpl.getInstance().update(selectedColleghi);
+                    DAOUtenti.getInstance().update(selectedColleghi);
                     showColleghiDetails(selectedColleghi);
                 } catch (DAOException e) {
                     e.printStackTrace();

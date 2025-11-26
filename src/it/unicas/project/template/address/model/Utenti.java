@@ -4,26 +4,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javafx.beans.property.*;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 
 /**
  * Model class for a Utenti.
- *
- * @author Mario Molinara
  */
-
-//ciao Martina facciamo questa prova
-
 public class Utenti {
 
     private StringProperty nome;
     private StringProperty cognome;
     private StringProperty username;
-    //private StringProperty telefono;
     private StringProperty email;
-    //private StringProperty compleanno;
     private StringProperty psw;
     private IntegerProperty idUtente;  //wrapper
 
@@ -33,22 +27,20 @@ public class Utenti {
      * Default constructor.
      */
     public Utenti() {
-        this(null, null);
+        this(null, null, null);
     }
 
-    public Utenti(String nome, String cognome, String email, String psw, Integer idColleghi) {
+    public Utenti(String nome, String cognome /*String username*/, String email, String psw, Integer idColleghi) {
         this.nome = new SimpleStringProperty(nome);
         this.cognome = new SimpleStringProperty(cognome);
-        // this.telefono = new SimpleStringProperty(telefono);
+        //this.username = new SimpleStringProperty(username);
         this.email = new SimpleStringProperty(email);
-        //this.compleanno = new SimpleStringProperty(compleanno);
+        this.psw = new SimpleStringProperty(psw);
         if (idColleghi != null){
             this.idUtente = new SimpleIntegerProperty(idColleghi);
         } else {
             this.idUtente = null;
         }
-        // impostare correttamente la password passata (evitare di inizializzare sempre vuoto)
-        this.psw = new SimpleStringProperty(psw != null ? psw : "");
     }
 
     /**
@@ -56,15 +48,15 @@ public class Utenti {
      *
      * @param nome
      * @param cognome
+     * @param psw
      */
-    public Utenti(String nome, String cognome) {
+    public Utenti(String nome, String cognome, String psw) {
         this.nome = new SimpleStringProperty(nome);
         this.cognome = new SimpleStringProperty(cognome);
         // Some initial dummy data, just for convenient testing.
-        // this.telefono = new SimpleStringProperty("telefono");
+        this.username = new SimpleStringProperty("username");
         this.email = new SimpleStringProperty("email@email.com");
-        this.psw = new SimpleStringProperty("psw");
-        //this.compleanno = new SimpleStringProperty("24-10-2017");
+        this.psw = new SimpleStringProperty(psw);
         this.idUtente = null;
     }
 
@@ -106,17 +98,17 @@ public class Utenti {
         return cognome;
     }
 
-    /* public String getTelefono() {
-        return telefono.get();
+    public String getUsername() {
+        return username.get();
     }
 
-    public void setTelefono(String telefono) {
-        this.telefono.set(telefono);
+    public void setUsername(String username) {
+        this.username.set(username);
     }
 
-    public StringProperty telefonoProperty() {
-        return telefono;
-    }*/
+    public StringProperty usernameProperty() {
+        return username;
+    }
 
     public String getEmail() {
         return email.get();
@@ -131,27 +123,20 @@ public class Utenti {
     }
 
     public String getPsw() {
-        return psw.get();
+        return psw.getValue();
     }
 
     public void setPsw(String psw) {
         this.psw.set(psw);
     }
-    /*public String getCompleanno() {
-        return compleanno.getValue();
-    }
 
-    public void setCompleanno(String compleanno) {
-        this.compleanno.set(compleanno);
+    public StringProperty pswProperty() {
+        return psw;
     }
-
-    public StringProperty compleannoProperty() {
-        return compleanno;
-    }*/
 
 
     public String toString(){
-        return nome.getValue() + ", " + cognome.getValue() + ", " /*+ telefono.getValue() + ", " */ + email.getValue() + ", " + /*compleanno.getValue() + */", (" + idUtente.getValue() + ")";
+        return nome.getValue() + ", " + cognome.getValue() + ", " + username.getValue() + ", " + email.getValue() + ", " + psw.getValue() + ", (" + idUtente.getValue() + ")";
     }
 
 
@@ -167,17 +152,17 @@ public class Utenti {
         collega.setNome("Mario");
 
 
-        //collega.compleannoProperty().addListener(myChangeListener);
+        collega.pswProperty().addListener(myChangeListener);
 
-        /*collega.compleannoProperty().addListener(
+        collega.pswProperty().addListener(
                 (ChangeListener) (o, oldVal, newVal) -> System.out.println("Compleanno property has changed!"));
 
-        collega.compleannoProperty().addListener(
+        collega.pswProperty().addListener(
                 (o, old, newVal)-> System.out.println("Compleanno property has changed! (Lambda implementation)")
-        );*/
+        );
 
 
-        // collega.setCompleanno("30-10-1971");
+        collega.setPsw("30-10-1971");
 
 
 

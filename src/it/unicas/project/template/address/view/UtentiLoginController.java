@@ -1,7 +1,7 @@
 package it.unicas.project.template.address.view;
 
 import it.unicas.project.template.address.model.Utenti;
-import it.unicas.project.template.address.model.dao.mysql.ColleghiDAOMySQLImpl;
+import it.unicas.project.template.address.model.dao.mysql.DAOUtenti;
 import it.unicas.project.template.address.model.dao.DAOException;
 import it.unicas.project.template.address.MainApp;
 import javafx.fxml.FXML;
@@ -121,7 +121,7 @@ public class UtentiLoginController {
 
             if (okClicked) {
                 try {
-                    ColleghiDAOMySQLImpl.getInstance().insert(tempColleghi);
+                    DAOUtenti.getInstance().insert(tempColleghi);
                     mainApp.getColleghiData().add(tempColleghi);
                     //colleghiTableView.getItems().add(tempColleghi);
                 } catch (DAOException e) {
