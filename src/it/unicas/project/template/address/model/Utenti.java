@@ -44,7 +44,8 @@ public class Utenti {
         } else {
             this.idUtente = null;
         }
-        this.psw = new SimpleStringProperty("");
+        // impostare correttamente la password passata (evitare di inizializzare sempre vuoto)
+        this.psw = new SimpleStringProperty(psw != null ? psw : "");
     }
 
     /**

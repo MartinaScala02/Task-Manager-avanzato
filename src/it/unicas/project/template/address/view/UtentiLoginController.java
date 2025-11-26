@@ -26,7 +26,7 @@ public class UtentiLoginController {
 
     private MainApp mainApp;
 
-    // Aggiunto: costruttore senza argomenti richiesto da FXMLLoader
+
     public UtentiLoginController() {
         // nulla qui; l'inizializzazione dipende da @FXML e da setMainApp()
     }
@@ -45,7 +45,7 @@ public class UtentiLoginController {
         pswVisibleField.setVisible(false);
         pswVisibleField.setManaged(false);
 
-        // Toggle: quando selezionato mostra il TextField, altrimenti mostra il PasswordField
+//per gestire la visibilità della password -> selezionato mostra il campo di testo normale, altrimenti mostra il PasswordField
         showpswBtn.selectedProperty().addListener((obs, oldV, newV) -> {
             if (newV) {
                 pswVisibleField.setVisible(true);
@@ -65,8 +65,7 @@ public class UtentiLoginController {
         });
     }
 
-
-        // Metodo per gestire il login: verifica email e psw confrontandoli con i dati in memoria (mainApp.getColleghiData())
+    //per gestire il login
     @FXML
     private void handleLogin() {
         String email = emailField.getText() == null ? "" : emailField.getText().trim();
@@ -96,9 +95,8 @@ public class UtentiLoginController {
                 success.setContentText("Benvenuto, " + displayName + "!");
                 success.showAndWait();
 
-                // Azioni aggiuntive possono essere inserite qui (es. notificare MainApp dell'utente loggato)
 
-                // Pulisco i campi
+
                 emailField.clear();
                 PasswordField.clear();
                 break;

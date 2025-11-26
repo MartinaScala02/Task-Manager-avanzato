@@ -48,23 +48,22 @@ public class MainApp extends Application {
         return colleghiData;
     }
 
-  @Override
-  public void start(Stage primaryStage) {
-    this.primaryStage = primaryStage;
-    this.primaryStage.setTitle("Task Manager Avanzato");
+    @Override
+    public void start(Stage primaryStage) {
+        this.primaryStage = primaryStage;
+        this.primaryStage.setTitle("Task Manager Avanzato");
 
-    // Set the application icon.
-    primaryStage.getIcons().add(new Image("file:resources/images/App_Icon.png"));
+        // Set the application icon.
+        primaryStage.getIcons().add(new Image("file:resources/images/App_Icon.png"));
+
+        initRootLayout();
+        //showColleghiOverview();
+        showUtentiLogin();
+
+        primaryStage.show();
 
 
-    initRootLayout();
-    //showColleghiOverview();
-      showUtentiLogin();
-
-    primaryStage.show();
-
-
-  }
+    }
 
     /**
      * Initializes the root layout and tries to load the last opened
@@ -325,5 +324,3 @@ class MyEventHandler implements EventHandler<WindowEvent> {
         //handleExit();
     }
 }
-
-
