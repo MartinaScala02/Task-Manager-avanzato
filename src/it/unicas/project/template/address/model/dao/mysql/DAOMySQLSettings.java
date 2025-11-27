@@ -96,9 +96,15 @@ public class DAOMySQLSettings {
         return DriverManager.getConnection("jdbc:mysql://" + currentDAOMySQLSettings.host  + "/" + currentDAOMySQLSettings.schema + PARAMETERS, currentDAOMySQLSettings.userName, currentDAOMySQLSettings.pwd).createStatement();
     }
 
-    public static void closeStatement(Statement st) throws SQLException{
-        st.getConnection().close();
-        st.close();
+    public static void closeStatement(Statement s) {
+        try {
+            if (s != null) {
+                s.close();
+            }
+        } catch (SQLException e) {
+            // Se la chiusura fallisce, non possiamo farci molto.
+            // Stampiamo l'errore ma NON lo rilanciamo, così non rompe il finally degli altri file.
+            e.printStackTrace();
+        }
     }
-
 }

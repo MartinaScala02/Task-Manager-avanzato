@@ -13,13 +13,13 @@ import java.util.logging.Logger;
 
 public class DAOUtenti implements DAO<Utenti> {
 
-    private DAOUtenti(){}
-
-    private static DAO dao = null;
+    // Singleton Pattern
+    private DAOUtenti() {}
+    private static DAOUtenti dao = null;
     private static Logger logger = null;
 
-    public static DAO getInstance(){
-        if (dao == null){
+    public static DAOUtenti getInstance() {
+        if (dao == null) {
             dao = new DAOUtenti();
             logger = Logger.getLogger(DAOUtenti.class.getName());
         }
@@ -27,114 +27,124 @@ public class DAOUtenti implements DAO<Utenti> {
     }
 
     @Override
-    public List<Utenti> select(Utenti a) throws DAOException {
-
-        if (a == null){
-            a = new Utenti("", "", "", "", null); // Cerca tutti gli elementi
-        }
-
+    public List<Utenti> select(Utenti u) throws DAOException {
         ArrayList<Utenti> lista = new ArrayList<>();
-        try{
+        Statement st = null;
 
-            if (a == null || a.getCognome() == null
-                    || a.getNome() == null
-                    || a.getEmail() == null){
-                throw new DAOException("In select: any field can be null");
+        try {
+            st = DAOMySQLSettings.getStatement();
+
+            // 1. Iniziamo con una query base sempre vera
+            // "WHERE 1=1" è un trucco SQL per poter aggiungere tutti gli "AND" dopo senza preoccuparsi
+            String sql = "SELECT * FROM Utenti WHERE 1=1 ";
+
+            // 2. COSTRUZIONE DINAMICA DELLA QUERY
+            // Aggiungiamo alla query SOLO i campi che non sono null
+            if (u != null) {
+
+                // Filtro Email (Fondamentale per Login)
+                if (u.getEmail() != null && !u.getEmail().isEmpty()) {
+                    sql += " AND email = '" + u.getEmail() + "'";
+                }
+
+                // Filtro Password (Fondamentale per Login)
+                // Verifica se nel tuo model il getter si chiama getPsw() o getPassword()
+                if (u.getPsw() != null && !u.getPsw().isEmpty()) {
+                    sql += " AND psw = '" + u.getPsw() + "'";
+                }
+
+                // Filtro Nome - Se è NULL (come nel login), questo IF viene saltato
+                // e NON rompe la query.
+                if (u.getNome() != null && !u.getNome().isEmpty()) {
+                    sql += " AND nome LIKE '" + u.getNome() + "%'";
+                }
+
+                // Filtro Cognome - Idem, se è NULL viene ignorato
+                if (u.getCognome() != null && !u.getCognome().isEmpty()) {
+                    sql += " AND cognome LIKE '" + u.getCognome() + "%'";
+                }
+
+                // Filtro ID (se serve cercare per ID specifico)
+                if (u.getIdUtente() != null && u.getIdUtente() > 0) {
+                    sql += " AND idUtente = " + u.getIdUtente();
+                }
             }
 
-            Statement st = DAOMySQLSettings.getStatement();
+            // logger.info("SQL Select generata: " + sql); // De-commenta per debug
 
-            // --- CORREZIONE EFFETTUATA QUI ---
-            String sql = "select * from Utenti where cognome like '";
-            sql += a.getCognome() + "%' and nome like '" + a.getNome() + "%'"; // Aggiunto chiusura %'
-
-            sql += " and email like '" + a.getEmail() + "%'";
-            // --------------------------------
-
-            try{
-                logger.info("SQL: " + sql);
-            } catch(NullPointerException nullPointerException){
-                logger.severe("SQL: " + sql);
-            }
             ResultSet rs = st.executeQuery(sql);
-            while(rs.next()){
-                lista.add(new Utenti(rs.getString("nome"),
+            while (rs.next()) {
+                lista.add(new Utenti(
+                        rs.getString("nome"),
                         rs.getString("cognome"),
                         rs.getString("email"),
                         rs.getString("psw"),
-                        rs.getInt("idUtente")));
+                        rs.getInt("idUtente")
+                ));
             }
-            DAOMySQLSettings.closeStatement(st);
 
-        } catch (SQLException sq){
-            throw new DAOException("In select(): " + sq.getMessage());
+        } catch (SQLException e) {
+            throw new DAOException("In select(): " + e.getMessage());
+        } finally {
+            DAOMySQLSettings.closeStatement(st);
         }
         return lista;
     }
 
     @Override
-    public void delete(Utenti a) throws DAOException {
-        if (a == null || a.getIdUtente() == null){
+    public void delete(Utenti u) throws DAOException {
+        if (u == null || u.getIdUtente() == null) {
             throw new DAOException("In delete: idUtente cannot be null");
         }
-        String query = "DELETE FROM Utenti WHERE idUtente='" + a.getIdUtente() + "';";
+        String query = "DELETE FROM Utenti WHERE idUtente=" + u.getIdUtente();
 
-        try{
-            logger.info("SQL: " + query);
-        } catch (NullPointerException nullPointerException){
-            System.out.println("SQL: " + query);
-        }
-
+        logger.info("SQL Delete: " + query);
         executeUpdate(query);
     }
-
 
     @Override
-    public void insert(Utenti a) throws DAOException {
-        verifyObject(a);
-
-        String query = "INSERT INTO Utenti (nome, cognome, email, psw, idUtente) VALUES  ('" +
-                a.getNome() + "', '" + a.getCognome() + "', '" +
-                a.getEmail() + "', '" + a.getPsw() +
-                "', NULL)";
-        try {
-            logger.info("SQL: " + query);
-        } catch (NullPointerException nullPointerException){
-            System.out.println("SQL: " + query);
+    public void insert(Utenti u) throws DAOException {
+        // Per l'inserimento, invece, vogliamo essere severi: nome ed email servono!
+        if (u == null || u.getNome() == null || u.getEmail() == null) {
+            throw new DAOException("Impossibile inserire utente: dati mancanti");
         }
+
+        String query = "INSERT INTO Utenti (nome, cognome, email, psw, idUtente) VALUES ('" +
+                u.getNome() + "', '" +
+                u.getCognome() + "', '" +
+                u.getEmail() + "', '" +
+                u.getPsw() + "', NULL)";
+
+        logger.info("SQL Insert: " + query);
         executeUpdate(query);
     }
-
 
     @Override
-    public void update(Utenti a) throws DAOException {
-        verifyObject(a);
+    public void update(Utenti u) throws DAOException {
+        if (u == null || u.getIdUtente() == null) {
+            throw new DAOException("In update: utente o ID nullo");
+        }
 
-        String query = "UPDATE Utenti SET nome = '" + a.getNome() + "', cognome = '" + a.getCognome() + "', email = '" + a.getEmail() + "'";
-        query = query + " WHERE idUtente = " + a.getIdUtente() + ";";
-        logger.info("SQL: " + query);
+        String query = "UPDATE Utenti SET " +
+                "nome = '" + u.getNome() + "', " +
+                "cognome = '" + u.getCognome() + "', " +
+                "email = '" + u.getEmail() + "', " +
+                "psw = '" + u.getPsw() + "'" +
+                " WHERE idUtente = " + u.getIdUtente();
 
+        logger.info("SQL Update: " + query);
         executeUpdate(query);
     }
 
-
-    private void verifyObject(Utenti a) throws DAOException {
-        if (a == null || a.getCognome() == null
-                || a.getNome() == null
-                || a.getEmail() == null){
-            throw new DAOException("In select: any field can be null");
-        }
-    }
-
-    private void executeUpdate(String query) throws DAOException{
+    private void executeUpdate(String query) throws DAOException {
+        Statement st = null;
         try {
-            Statement st = DAOMySQLSettings.getStatement();
-            int n = st.executeUpdate(query);
-
-            DAOMySQLSettings.closeStatement(st);
-
+            st = DAOMySQLSettings.getStatement();
+            st.executeUpdate(query);
         } catch (SQLException e) {
-            throw new DAOException("In insert(): " + e.getMessage());
+            throw new DAOException("Database Error: " + e.getMessage());
+        } finally {
+            DAOMySQLSettings.closeStatement(st);
         }
     }
 }

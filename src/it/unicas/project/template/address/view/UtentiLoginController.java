@@ -9,6 +9,9 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.PasswordField; //gestisce automaticamente la maschera
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
+import javafx.stage.Stage;
+
+import java.util.List;
 
 public class UtentiLoginController {
 
@@ -68,51 +71,61 @@ public class UtentiLoginController {
     //per gestire il login
     @FXML
     private void handleLogin() {
-        String email = emailField.getText() == null ? "" : emailField.getText().trim();
-        String psw = PasswordField.getText() == null ? "" : PasswordField.getText();
+        // 1. Prendo i dati
+        String emailInserita = emailField.getText();
+        String passwordInserita = PasswordField.getText();
 
-        if (email.isEmpty() || psw.isEmpty()) {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.initOwner(mainApp.getPrimaryStage());
-            alert.setTitle("Input mancante");
-            alert.setHeaderText("Email o password mancanti");
+        // 2. Controllo se i campi sono vuoti
+        if (emailInserita == null || emailInserita.isEmpty() || passwordInserita == null || passwordInserita.isEmpty()) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setContentText("Inserisci email e password.");
             alert.showAndWait();
             return;
         }
 
-        boolean authenticated = false;
-        for (Utenti u : mainApp.getColleghiData()) {
-            if (u.getEmail() != null && u.getEmail().equalsIgnoreCase(email)
-                    && u.getPsw() != null && u.getPsw().equals(psw)) {
-                authenticated = true;
+        try {
+            // 3. Creo l'utente per la ricerca (con il trucco del nome vuoto ma non null)
+            Utenti userDaCercare = new Utenti();
+            userDaCercare.setEmail(emailInserita);
+            userDaCercare.setPsw(passwordInserita);
+            // IMPORTANTE: Se il tuo DAO non è stato corretto, decommenta queste righe:
+            // userDaCercare.setNome("");
+            // userDaCercare.setCognome("");
 
-                Alert success = new Alert(Alert.AlertType.INFORMATION);
-                success.initOwner(mainApp.getPrimaryStage());
-                success.setTitle("Login effettuato");
-                success.setHeaderText(null);
-                String displayName = (u.getNome() != null && !u.getNome().isEmpty()) ? u.getNome() : u.getEmail();
-                success.setContentText("Benvenuto, " + displayName + "!");
-                success.showAndWait();
+            // 4. Cerco nel Database
+            List<Utenti> risultato = DAOUtenti.getInstance().select(userDaCercare);
 
+            if (!risultato.isEmpty()) {
+                // --- LOGIN CORRETTO ---
+                Utenti utenteLoggato = risultato.get(0);
+                MainApp.setCurrentUser(utenteLoggato); // Salvo l'utente nella sessione
 
+                // Messaggio di Benvenuto
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Successo");
+                alert.setHeaderText(null);
+                alert.setContentText("Benvenuto " + utenteLoggato.getNome() + "!");
+                alert.showAndWait();
 
-                emailField.clear();
-                PasswordField.clear();
-                break;
+                // === MODIFICA FONDAMENTALE ===
+                // Invece di dialogStage.close(), usiamo questo codice che funziona sempre:
+                Stage stage = (Stage) emailField.getScene().getWindow();
+                stage.close();
+                // ==============================
+
+            } else {
+                // --- LOGIN FALLITO ---
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Errore");
+                alert.setHeaderText("Login Fallito");
+                alert.setContentText("Email o Password errate.");
+                alert.showAndWait();
             }
-        }
 
-        if (!authenticated) {
-            Alert alert = new Alert(Alert.AlertType.ERROR);
-            alert.initOwner(mainApp.getPrimaryStage());
-            alert.setTitle("Login fallito");
-            alert.setHeaderText("Email o password errati");
-            alert.setContentText("Verifica le credenziali e riprova.");
-            alert.showAndWait();
+        } catch (DAOException e) {
+            e.printStackTrace();
         }
     }
-
 
     @FXML
     private void handleRegister(){

@@ -33,6 +33,17 @@ public class MainApp extends Application {
     private Stage primaryStage;
     private BorderPane rootLayout;
 
+    // Variabile statica per tenere traccia dell'utente loggato
+    private static Utenti currentUser = null;
+
+    // Metodi per leggere e scrivere l'utente loggato
+    public static Utenti getCurrentUser() {
+        return currentUser;
+    }
+
+    public static void setCurrentUser(Utenti user) {
+        currentUser = user;
+    }
     /**
      * Constructor
      */
