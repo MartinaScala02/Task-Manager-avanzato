@@ -45,7 +45,7 @@
                     <Label text="MENU" styleClass="label-bright" />
                     <Separator />
 
-                    <Button text="👤 Profilo" styleClass="button-menu"/>
+                    <Button text="👤 Profilo" styleClass="button-menu" onAction ='#handleProfile'/>
 
                 </VBox>
 

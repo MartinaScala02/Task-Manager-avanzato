@@ -30,7 +30,6 @@ public class UtentiLoginController {
 
 
     public UtentiLoginController() {
-        // nulla qui; l'inizializzazione dipende da @FXML e da setMainApp()
     }
 
     public void setMainApp(MainApp mainApp) {
@@ -70,11 +69,11 @@ public class UtentiLoginController {
     //per gestire il login
     @FXML
     private void handleLogin() {
-        // 1. Prendo i dati
+
         String emailInserita = emailField.getText();
         String passwordInserita = PasswordField.getText();
 
-        // 2. Controllo se i campi sono vuoti
+
         if (emailInserita == null || emailInserita.isEmpty() || passwordInserita == null || passwordInserita.isEmpty()) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setContentText("Inserisci email e password.");
@@ -83,21 +82,19 @@ public class UtentiLoginController {
         }
 
         try {
-            // 3. Creo l'utente per la ricerca (con il trucco del nome vuoto ma non null)
+
             Utenti userDaCercare = new Utenti();
             userDaCercare.setEmail(emailInserita);
             userDaCercare.setPsw(passwordInserita);
-            // IMPORTANTE: Se il tuo DAO non è stato corretto, decommenta queste righe:
-            // userDaCercare.setNome("");
-            // userDaCercare.setCognome("");
 
-            // 4. Cerco nel Database
+
+
             List<Utenti> risultato = DAOUtenti.getInstance().select(userDaCercare);
 
             if (!risultato.isEmpty()) {
-                // --- LOGIN CORRETTO ---
+
                 Utenti utenteLoggato = risultato.get(0);
-                MainApp.setCurrentUser(utenteLoggato); // Salvo l'utente nella sessione
+                MainApp.setCurrentUser(utenteLoggato);
 
 
                 // Messaggio di Benvenuto
@@ -107,13 +104,7 @@ public class UtentiLoginController {
                 alert.setContentText("Benvenuto " + utenteLoggato.getNome() + "!");
                 alert.showAndWait();
 
-//                // === MODIFICA FONDAMENTALE ===
-//                // Invece di dialogStage.close(), usiamo questo codice che funziona sempre:
-//                Stage stage = (Stage) emailField.getScene().getWindow();
-//                stage.close();
-//                // ==============================
-
-                mainApp.showMainScreen(); // Apro la schermata principale
+                mainApp.showMainScreen();
 
             } else {
                 // --- LOGIN FALLITO ---
@@ -132,14 +123,14 @@ public class UtentiLoginController {
 
     @FXML
     private void handleRegister(){
-            Utenti tempColleghi = new Utenti();
-            boolean okClicked = mainApp.showColleghiEditDialog(tempColleghi, true);
+            Utenti tempUtenti = new Utenti();
+            boolean okClicked = mainApp.showUtentiEditDialog(tempUtenti);
 
             if (okClicked) {
                 try {
-                    DAOUtenti.getInstance().insert(tempColleghi);
-                    mainApp.getColleghiData().add(tempColleghi);
-                    //colleghiTableView.getItems().add(tempColleghi);
+                    DAOUtenti.getInstance().insert(tempUtenti);
+                    mainApp.getColleghiData().add(tempUtenti);
+
                 } catch (DAOException e) {
                     Alert alert = new Alert(Alert.AlertType.ERROR);
                     alert.initOwner(mainApp.getPrimaryStage());

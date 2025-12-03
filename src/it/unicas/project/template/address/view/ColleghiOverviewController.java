@@ -18,7 +18,7 @@ import java.util.List;
 
 public class ColleghiOverviewController {
     @FXML
-    private TableView<Utenti> colleghiTableView;
+    private TableView<Utenti> utentiTableView;
     @FXML
     private TableColumn<Utenti, String> nomeColumn;
     @FXML
@@ -66,9 +66,9 @@ public class ColleghiOverviewController {
         showColleghiDetails(null);
 
         // Listen for selection changes and show the Utenti details when changed.
-        colleghiTableView.getSelectionModel().selectedItemProperty().addListener(
+        utentiTableView.getSelectionModel().selectedItemProperty().addListener(
                 (observable, oldValue, newValue) -> showColleghiDetails(newValue));
-        colleghiTableView.getSelectionModel().selectedItemProperty().addListener(
+        utentiTableView.getSelectionModel().selectedItemProperty().addListener(
                 (observable, oldValue, newValue) -> System.out.println("Click on the table"));
     }
 
@@ -81,7 +81,7 @@ public class ColleghiOverviewController {
         this.mainApp = mainApp;
 
         // Add observable list data to the table
-        colleghiTableView.setItems(mainApp.getColleghiData());
+        utentiTableView.setItems(mainApp.getColleghiData());
     }
 
     /**
@@ -114,14 +114,14 @@ public class ColleghiOverviewController {
     @FXML
     private void handleDeleteColleghi() {
 
-      int selectedIndex = colleghiTableView.getSelectionModel().getSelectedIndex();
+      int selectedIndex = utentiTableView.getSelectionModel().getSelectedIndex();
         if (selectedIndex >= 0) {
 
-            Utenti colleghi = colleghiTableView.getItems().get(selectedIndex);
+            Utenti colleghi = utentiTableView.getItems().get(selectedIndex);
             try {
                 DAOUtenti.getInstance().delete(colleghi);
                 mainApp.getColleghiData().remove(selectedIndex);
-                //colleghiTableView.getItems().remove(selectedIndex);
+                //utentiTableView.getItems().remove(selectedIndex);
             } catch (DAOException e) {
               Alert alert = new Alert(AlertType.ERROR);
               alert.initOwner(mainApp.getPrimaryStage());
@@ -156,7 +156,7 @@ public class ColleghiOverviewController {
             try {
                 DAOUtenti.getInstance().insert(tempColleghi);
                 mainApp.getColleghiData().add(tempColleghi);
-                //colleghiTableView.getItems().add(tempColleghi);
+                //utentiTableView.getItems().add(tempColleghi);
             } catch (DAOException e) {
                 Alert alert = new Alert(AlertType.ERROR);
                 alert.initOwner(mainApp.getPrimaryStage());
@@ -202,7 +202,7 @@ public class ColleghiOverviewController {
      */
     @FXML
     private void handleEditColleghi() {
-        Utenti selectedColleghi = colleghiTableView.getSelectionModel().getSelectedItem();
+        Utenti selectedColleghi = utentiTableView.getSelectionModel().getSelectedItem();
         if (selectedColleghi != null) {
             boolean okClicked = mainApp.showColleghiEditDialog(selectedColleghi,true);
             if (okClicked) {

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefWidth="380" prefHeight="260" styleClass="background"
+            stylesheets="@DarkTheme.css"
+            xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="it.unicas.project.template.address.view.UtentiProfileController">
+
+    <children>
+
+        <VBox spacing="15" AnchorPane.topAnchor="20" AnchorPane.leftAnchor="20"
+              AnchorPane.rightAnchor="20" AnchorPane.bottomAnchor="20">
+
+            <Label text="Profilo Utente" styleClass="label-header-list" />
+
+            <GridPane hgap="10" vgap="10">
+                <columnConstraints>
+                    <ColumnConstraints halignment="RIGHT"/>
+                    <ColumnConstraints hgrow="ALWAYS"/>
+                </columnConstraints>
+
+                <children>
+                    <Label text="Nome:"/>
+                    <Label fx:id="nomeLabel" GridPane.columnIndex="1"/>
+
+                    <Label text="Cognome:" GridPane.rowIndex="1"/>
+                    <Label fx:id="cognomeLabel" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                    <Label text="Email:" GridPane.rowIndex="2"/>
+                    <Label fx:id="emailLabel" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                </children>
+            </GridPane>
+
+            <HBox spacing="20" alignment="CENTER_RIGHT">
+                <Button text="Modifica"  onAction="#handleEditUtenti"/>
+                <Button text="Elimina" onAction="#handleDelete" style="-fx-background-color: #b33939; -fx-text-fill: white;" />
+            </HBox>
+
+        </VBox>
+
+    </children>
+</AnchorPane>

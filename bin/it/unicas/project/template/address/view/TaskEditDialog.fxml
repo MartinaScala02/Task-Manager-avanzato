@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="it.unicas.project.template.address.view.TaskEditDialogController"
+            prefWidth="400" prefHeight="450">
+
+    <children>
+        <VBox spacing="10" alignment="TOP_LEFT" AnchorPane.topAnchor="10" AnchorPane.leftAnchor="10"
+              AnchorPane.rightAnchor="10" AnchorPane.bottomAnchor="10">
+
+            <Label text="Modifica Task" style="-fx-font-size: 18px; -fx-font-weight: bold;"  />
+
+            <GridPane hgap="10" vgap="10">
+                <columnConstraints>
+                    <ColumnConstraints halignment="RIGHT" prefWidth="100" />
+                    <ColumnConstraints hgrow="ALWAYS" />
+                </columnConstraints>
+
+                <Label text="Titolo:" GridPane.rowIndex="0" GridPane.columnIndex="0" />
+                <TextField fx:id="titoloField" GridPane.rowIndex="0" GridPane.columnIndex="1" />
+
+                <Label text="Descrizione:" GridPane.rowIndex="1" GridPane.columnIndex="0" />
+                <TextArea fx:id="descrizioneField" prefRowCount="4" GridPane.rowIndex="1" GridPane.columnIndex="1" wrapText="true"/>
+
+                <Label text="Categoria:" GridPane.rowIndex="2" GridPane.columnIndex="0" />
+                <ComboBox fx:id="categoryComboBox" GridPane.rowIndex="2" GridPane.columnIndex="1" />
+
+                <Label text="Priorità:" GridPane.rowIndex="3" GridPane.columnIndex="0" />
+                <ComboBox fx:id="priorityComboBox" GridPane.rowIndex="3" GridPane.columnIndex="1" />
+
+                <Label text="Scadenza:" GridPane.rowIndex="4" GridPane.columnIndex="0" />
+                <DatePicker fx:id="scadenzaField" GridPane.rowIndex="4" GridPane.columnIndex="1" />
+            </GridPane>
+
+            <ListView fx:id="taskListView" prefHeight="120" />
+
+            <HBox spacing="10" alignment="CENTER_RIGHT">
+                <children>
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Button text="OK" onAction="#handleOk" fx:id="okButton"/>
+                    <Button text="Annulla" onAction="#handleCancel" />
+                </children>
+            </HBox>
+
+        </VBox>
+    </children>
+</AnchorPane>

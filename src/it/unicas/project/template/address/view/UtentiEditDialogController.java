@@ -1,6 +1,7 @@
 package it.unicas.project.template.address.view;
 
 import it.unicas.project.template.address.model.Utenti;
+import it.unicas.project.template.address.util.DateUtil;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -8,20 +9,17 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.stage.Stage;
+import it.unicas.project.template.address.MainApp;
+import it.unicas.project.template.address.model.dao.mysql.DAOUtenti;
+import it.unicas.project.template.address.model.dao.DAOException;
 
-/**
- * Dialog to edit details of a colleghi.
- *
- * @author Mario Molinara
- */
-public class ColleghiEditDialogController {
+
+public class UtentiEditDialogController {
 
     @FXML
     private TextField nomeField;
     @FXML
     private TextField cognomeField;
-    //@FXML
-    //private TextField telefonoField;
     @FXML
     private TextField emailField;
     @FXML
@@ -32,16 +30,12 @@ public class ColleghiEditDialogController {
     private ToggleButton showpswBtn;
 
     private Stage dialogStage;
-    private Utenti colleghi;
+    private Utenti user;
+    private MainApp mainApp;
     private boolean okClicked = false;
     private boolean verifyLen = true;
 
-    /**
-     * Initializes the controller class. This method is automatically called
-     * after the fxml file has been loaded.
-     */
-    @FXML
-    private void initialize() {
+    private void inizialize(){
         // Sincronizza i due campi (testo condiviso)
         pswVisibleField.textProperty().bindBidirectional(PasswordField.textProperty());
 
@@ -69,42 +63,11 @@ public class ColleghiEditDialogController {
         });
 
     }
-
-    /**
-     * Sets the stage of this dialog.
-     *
-     * @param dialogStage
-     */
-    public void setDialogStage(Stage dialogStage, boolean verifyLen) {
+    public void setDialogStage(Stage dialogStage) {
         this.dialogStage = dialogStage;
         this.verifyLen = verifyLen;
 
-        // Set the dialog icon.
-        //this.dialogStage.getIcons().add(new Image("file:resources/images/edit.png"));
     }
-
-    /**
-     * Sets the colleghi to be edited in the dialog.
-     *
-     * @param colleghi
-     */
-    public void setColleghi(Utenti colleghi) {
-        this.colleghi = colleghi;
-
-        nomeField.setText(colleghi.getNome());
-        cognomeField.setText(colleghi.getCognome());
-        //telefonoField.setText(colleghi.getTelefono());
-        emailField.setText(colleghi.getEmail());
-        PasswordField.setText(colleghi.getPsw());
-        // compleannoField.setText(colleghi.getCompleanno());
-        // compleannoField.setPromptText("dd-mm-yyyy");
-    }
-
-    /**
-     * Returns true if the user clicked OK, false otherwise.
-     *
-     * @return
-     */
     public boolean isOkClicked() {
         return okClicked;
     }
@@ -112,10 +75,23 @@ public class ColleghiEditDialogController {
     @FXML
     private void handleOk() {
         if (isInputValid(verifyLen)) {
-            colleghi.setNome(nomeField.getText());
-            colleghi.setCognome(cognomeField.getText());
-            colleghi.setEmail(emailField.getText());
-            colleghi.setPsw(PasswordField.getText());
+            user.setNome(nomeField.getText());
+            user.setCognome(cognomeField.getText());
+            user.setEmail(emailField.getText());
+            user.setPsw(PasswordField.getText());
+
+            try {
+                DAOUtenti.getInstance().update(user); // salva nel database
+            } catch (DAOException e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.initOwner(dialogStage);
+                alert.setTitle("Errore");
+                alert.setHeaderText("Non è stato possibile salvare le modifiche");
+                alert.setContentText(e.getMessage());
+                alert.showAndWait();
+                return; // esce senza chiudere il dialog
+            }
+
             okClicked = true;
             dialogStage.close();
         }
@@ -126,6 +102,7 @@ public class ColleghiEditDialogController {
     private void handleCancel() {
         dialogStage.close();
     }
+
 
     private boolean isInputValid(boolean verifyLen) {
         String errorMessage = "";
@@ -145,11 +122,12 @@ public class ColleghiEditDialogController {
             errorMessage += "psw non valida!\n";
         }
 
+
         if (errorMessage.length() == 0) {
             return true;
         } else {
             // Show the error message.
-            Alert alert = new Alert(AlertType.ERROR);
+            Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.initOwner(dialogStage);
             alert.setTitle("Campi non validi");
             alert.setHeaderText("Per favore, correggi i campi non validi.");
@@ -160,5 +138,17 @@ public class ColleghiEditDialogController {
             return false;
         }
     }
+
+
+    public void setUser(Utenti user) {
+        this.user = user;
+
+        nomeField.setText(user.getNome());
+        cognomeField.setText(user.getCognome());
+        emailField.setText(user.getEmail());
+        PasswordField.setText(user.getPsw());
+
+    }
+
 
 }

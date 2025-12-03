@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.prefs.Preferences;
 
+import it.unicas.project.template.address.model.Tasks;
 import it.unicas.project.template.address.model.Utenti;
 import it.unicas.project.template.address.model.dao.DAOException;
 // IMPORTANTE: Qui importiamo la tua nuova classe DAOUtenti
@@ -275,7 +276,77 @@ public class MainApp extends Application {
 
     /**
      * Opens a dialog to show birthday statistics.
+     *
+     * @return
      */
+    public boolean showUtentiEditDialog(Utenti user) {
+        try {
+
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(MainApp.class.getResource("view/UtentiEditDialog.fxml"));
+            AnchorPane page = (AnchorPane) loader.load();
+
+
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle("Edit Utenti");
+            dialogStage.initModality(Modality.WINDOW_MODAL);
+            dialogStage.initOwner(primaryStage);
+            Scene scene = new Scene(page);
+            dialogStage.setScene(scene);
+
+            // Set the colleghi into the controller.
+            UtentiEditDialogController controller = loader.getController();
+            controller.setDialogStage(dialogStage);
+            controller.setUser(user);
+
+            dialogStage.getIcons().add(new Image("file:resources/images/edit.png"));
+
+            dialogStage.showAndWait();
+
+            return controller.isOkClicked();
+        } catch (IOException e) {
+
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean showTasksEditDialog(Tasks task) {
+        try {
+            // Carica il fxml
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/it/unicas/project/template/address/view/TaskEditDialog.fxml"));
+            AnchorPane page = loader.load();
+
+            // Crea la stage
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle("Edit Task");
+            dialogStage.initModality(Modality.WINDOW_MODAL);
+            dialogStage.initOwner(primaryStage);
+            Scene scene = new Scene(page);
+            dialogStage.setScene(scene);
+
+            // Imposta il controller
+            TaskEditDialogController controller = loader.getController();
+            controller.setDialogStage(dialogStage);
+            controller.setTask(task); // Passa il task da modificare
+
+            // Icona
+            dialogStage.getIcons().add(new Image("file:resources/images/edit.png"));
+
+            // Mostra e aspetta chiusura
+            dialogStage.showAndWait();
+
+            return controller.isOkClicked();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
+
+
     public void showBirthdayStatistics() {
         try {
             // Load the fxml file and create a new stage for the popup.
@@ -319,20 +390,38 @@ public class MainApp extends Application {
         } catch (IOException e) {
             e.printStackTrace();
         }
-//        // se hai già showColleghiOverview(), delega a quello
-//        showColleghiOverview();
-//    }
-//
-//    // opzionale: tenere traccia dell'utente loggato
-//    private it.unicas.project.template.address.model.Utenti currentUser;
-//    public void setCurrentUser(it.unicas.project.template.address.model.Utenti u) {
-//        this.currentUser = u;
-//    }
-//    public it.unicas.project.template.address.model.Utenti getCurrentUser() {
-//        return this.currentUser;
     }
 
 
+    public boolean showUtentiProfile(Utenti user) {
+        try {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(MainApp.class.getResource("view/UtentiProfile.fxml"));
+            AnchorPane page = loader.load();
+
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle("Profilo Utente");
+            dialogStage.initModality(Modality.WINDOW_MODAL);
+            dialogStage.initOwner(primaryStage);
+            Scene scene = new Scene(page);
+            dialogStage.setScene(scene);
+
+            // Ottieni il controller e passa tutti i dati necessari
+            UtentiProfileController controller = loader.getController();
+            controller.setDialogStage(dialogStage);
+            controller.setUser(user);
+            controller.setMainApp(this);
+
+            dialogStage.getIcons().add(new Image("file:resources/images/edit.png"));
+
+            dialogStage.showAndWait();
+
+            return controller.isOkClicked();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
     /**
      * Returns the Utenti file preference, i.e. the file that was last opened.
@@ -383,7 +472,34 @@ public class MainApp extends Application {
     public static void main(String[] args) {
         MainApp.launch(args);
     }
-}
+    public boolean showTaskEditDialog(Tasks task) {
+        try {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(MainApp.class.getResource("view/TaskEditDialog.fxml"));
+            AnchorPane page = (AnchorPane) loader.load();
+
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle("Modifica Task");
+            dialogStage.initModality(Modality.WINDOW_MODAL);
+            dialogStage.initOwner(primaryStage);
+            Scene scene = new Scene(page);
+            dialogStage.setScene(scene);
+
+            // Set the task into the controller.
+            TaskEditDialogController controller = loader.getController();
+            controller.setDialogStage(dialogStage);
+            controller.setTask(task);
+
+            dialogStage.getIcons().add(new Image("file:resources/images/edit.png"));
+
+            dialogStage.showAndWait();
+
+            return controller.isOkClicked();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
 
 class MyEventHandler implements EventHandler<WindowEvent> {
@@ -392,6 +508,6 @@ class MyEventHandler implements EventHandler<WindowEvent> {
         windowEvent.consume();
         //handleExit();
     }
-
+}
 }
 
