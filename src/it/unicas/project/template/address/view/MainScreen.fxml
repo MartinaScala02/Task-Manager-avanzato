@@ -1,90 +1,125 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane prefHeight="700.0" prefWidth="1100.0" styleClass="background" stylesheets="@DarkTheme.css"
-            xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="it.unicas.project.template.address.view.MainScreenController">
+<BorderPane styleClass="background" stylesheets="@DarkTheme.css" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unicas.project.template.address.view.MainScreenController">
 
     <top>
-        <HBox alignment="CENTER_LEFT" spacing="20" styleClass="header-bar" style="-fx-padding: 10 20 10 20;" >
-            <Button onAction="#toggleMenu" text="☰" styleClass="button-icon" />
+        <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-padding: 15 25;" styleClass="header-bar">
+            <Button onAction="#toggleMenu" styleClass="button-icon" text="☰" />
 
-            <Label fx:id="welcomeLabel" text="Task Manager" styleClass="label-bright" >
-                <font><Font size="16.0" /></font>
+            <Label fx:id="welcomeLabel" text="Task Manager">
+                <style>
+                    -fx-font-family: 'Book Antiqua';
+                    -fx-text-fill: #F071A7;
+                    -fx-font-size: 32px;
+                    -fx-font-weight: bold;
+                </style>
             </Label>
 
             <Region HBox.hgrow="ALWAYS" />
 
-            <HBox alignment="CENTER" spacing="10" styleClass="profile-container" >
-                <Region prefHeight="30" prefWidth="30" styleClass="profile-placeholder"/>
-                <Label fx:id="usernameLabelHeader" text="Utente Loggato" styleClass="label-bright" />
-                <Button onAction="#handleLogout" text="Logout" styleClass="button-logout" />
+            <HBox alignment="CENTER" spacing="15" styleClass="profile-container">
+                <HBox alignment="CENTER_LEFT" spacing="10" style="-fx-background-color: #2F223D; -fx-background-radius: 8; -fx-padding: 8;">
+                    <Region prefHeight="32" prefWidth="32" styleClass="profile-placeholder" />
+                    <VBox alignment="CENTER_LEFT">
+                        <Label fx:id="usernameLabelHeader" style="-fx-font-size: 13px; -fx-font-weight: bold;" styleClass="label-bright" text="Nome Utente" />
+                    </VBox>
+                </HBox>
+
+                <Button onAction="#handleLogout" styleClass="button-logout" text="Logout" />
             </HBox>
+
         </HBox>
     </top>
 
     <left>
         <StackPane alignment="TOP_LEFT">
 
-            <VBox prefWidth="240" spacing="15" styleClass="category-box">
-                <style>-fx-padding: 20 0 0 0;</style>
+            <VBox prefWidth="250" spacing="15" styleClass="category-box">
+                <style>-fx-padding: 30 20 20 20; -fx-background-color: #1F162A; -fx-border-color: #3A2C49; -fx-border-width: 0 1 0 0;</style>
 
-                <Button maxWidth="Infinity" styleClass="button-menu" text="Home Tasks"  />
-                <Button maxWidth="Infinity" styleClass="button-menu" text="Tasks Completate" />
+                <Label style="-fx-opacity: 0.5; -fx-font-size: 11px;" styleClass="label-bright" text="FILTRI RAPIDI" />
+
+                <Button maxWidth="Infinity" style="-fx-alignment: CENTER_LEFT;" styleClass="button-menu" text="🏠 Home Tasks" />
+                <Button maxWidth="Infinity" style="-fx-alignment: CENTER_LEFT;" styleClass="button-menu" text="✅ Tasks Completate" />
             </VBox>
 
-            <!-- Side Menu -->
-            <VBox fx:id="sideMenu" prefWidth="240" spacing="15" styleClass="category-box" translateX="-300">
-                <style>-fx-padding: 20; -fx-background-color: #2b2b2b;</style>
+            <VBox fx:id="sideMenu" prefWidth="250" spacing="15" styleClass="category-box" translateX="-300">
+                <style>-fx-padding: 30 20 20 20; -fx-background-color: #2b2b2b; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 10, 0, 5, 0);</style>
 
+                <Label style="-fx-opacity: 0.5; -fx-font-size: 11px;" styleClass="label-bright" text="MENU UTENTE" />
+                <Separator style="-fx-opacity: 0.3;" />
 
                 <VBox spacing="10">
-                    <Label text="MENU" styleClass="label-bright" />
-                    <Separator />
-
-                    <Button text="👤 Profilo" styleClass="button-menu" onAction ='#handleProfile'/>
-
+                    <Button maxWidth="Infinity" onAction="#handleProfile" style="-fx-alignment: CENTER_LEFT;" styleClass="button-menu" text="👤 Il mio Profilo" />
+                    <Button maxWidth="Infinity" style="-fx-alignment: CENTER_LEFT;" styleClass="button-menu" text="⚙️ Impostazioni" />
                 </VBox>
 
-                <Region VBox.vgrow="ALWAYS"/> <!--mi serve per spingere il bottone in basso-->
+                <Region VBox.vgrow="ALWAYS" />
 
-                <Button maxWidth="Infinity" styleClass="button-menu" text="❌ Esci" onAction="#handleExit" />
+                <Button maxWidth="Infinity" onAction="#handleExit" style="-fx-alignment: CENTER_LEFT;" styleClass="button-menu" text="❌ Esci" />
             </VBox>
-
-
         </StackPane>
     </left>
 
     <center>
-        <VBox fx:id="tasksContainer" spacing="15" styleClass="tasks-container" style="-fx-padding: 20;">
+        <VBox fx:id="tasksContainer" spacing="0">
 
-            <Label text="Tasks" styleClass="label-header-list">
-                <font><Font size="24.0" /></font>
-            </Label>
-            <Separator />
+            <HBox alignment="CENTER_LEFT" style="-fx-padding: 20 30;">
+                <Label styleClass="label-header-list" text="Le mie Attività">
+                    <font><Font size="26.0" /></font>
+                </Label>
+                <Region HBox.hgrow="ALWAYS" />
+            </HBox>
 
-            <ListView fx:id="taskListView" styleClass="list-view" VBox.vgrow="ALWAYS" />
+            <Separator style="-fx-opacity: 0.1;" />
 
-            <VBox spacing="10" styleClass="quick-add-form">
+            <VBox spacing="20" style="-fx-padding: 20 30 30 30;" VBox.vgrow="ALWAYS">
 
-                <VBox spacing="5">
-                    <TextField fx:id="newTaskField" promptText="Titolo della nuova task (obbligatorio)" />
-                    <TextArea fx:id="descriptionArea" prefHeight="60.0" promptText="Descrizione dettagliata (opzionale)" wrapText="true" />
+                <ListView fx:id="taskListView" style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 2);" styleClass="list-view" VBox.vgrow="NEVER" />
+
+                <VBox spacing="15" style="-fx-background-color: #2A1E35; -fx-padding: 20; -fx-background-radius: 12; -fx-border-color: #3F2E51; -fx-border-radius: 12;" styleClass="quick-add-form" VBox.vgrow="NEVER">
+
+                    <HBox alignment="CENTER_LEFT">
+                        <Label style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-opacity: 0.7;" styleClass="label-bright" text="AGGIUNGI NUOVA ATTIVITÀ" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Button onAction="#handleNewTask" prefHeight="40.0" prefWidth="47.0" style="-fx-font-weight: bold; -fx-cursor: hand;" styleClass="button-green" text="+" />
+                    </HBox>
+
+                    <HBox alignment="TOP_LEFT" spacing="15">
+                        <VBox spacing="10" HBox.hgrow="ALWAYS">
+                            <TextField fx:id="newTaskField" maxWidth="Infinity" promptText="Titolo della task..." style="-fx-font-size: 14px;" />
+                            <TextArea fx:id="descriptionArea" maxWidth="Infinity" prefHeight="55" promptText="Dettagli aggiuntivi (opzionale)" wrapText="true" />
+                        </VBox>
+
+                        <VBox maxWidth="280" minWidth="220" spacing="10">
+
+                            <ComboBox fx:id="categoryComboBox" prefHeight="54.0" prefWidth="Infinity" promptText="Categoria" HBox.hgrow="ALWAYS" />
+                            <HBox spacing="10">
+                                <DatePicker fx:id="dueDateField" maxHeight="1.7976931348623157E308" minHeight="-Infinity" prefWidth="0.0" promptText="Scadenza" HBox.hgrow="ALWAYS" />
+                                <ComboBox fx:id="priorityComboBox" prefWidth="0" promptText="Priorità" HBox.hgrow="ALWAYS" />
+                            </HBox>
+                        </VBox>
+                    </HBox>
+
                 </VBox>
 
-                <HBox alignment="CENTER_LEFT" spacing="15">
-                    <DatePicker fx:id="dueDateField" prefWidth="150" promptText="Scadenza" />
-
-                    <ComboBox fx:id="categoryComboBox" prefWidth="130" />
-                    <ComboBox fx:id="priorityComboBox" prefWidth="120" />
-
-                    <Region HBox.hgrow="ALWAYS" />
-                    <Button onAction="#handleNewTask" styleClass="button-green" text="+" />
-                </HBox>
             </VBox>
         </VBox>
     </center>
+
 </BorderPane>

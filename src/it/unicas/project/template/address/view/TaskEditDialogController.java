@@ -2,23 +2,16 @@ package it.unicas.project.template.address.view;
 
 import it.unicas.project.template.address.MainApp;
 import it.unicas.project.template.address.model.Tasks;
-import it.unicas.project.template.address.model.dao.DAOException;
 import it.unicas.project.template.address.model.dao.mysql.DAOCategorie;
-import it.unicas.project.template.address.model.dao.mysql.DAOTasks;
-import it.unicas.project.template.address.util.DateUtil;
 import it.unicas.project.template.address.model.Categorie;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
+import it.unicas.project.template.address.util.DateUtil;
 import javafx.fxml.FXML;
-import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
-import java.time.LocalDate; // <-- IMPORT NECESSARIO
+import java.time.LocalDate;
 import java.util.List;
 
 public class TaskEditDialogController {
@@ -33,12 +26,6 @@ public class TaskEditDialogController {
     private DatePicker scadenzaField;
     @FXML
     private ComboBox<String> priorityComboBox;
-    @FXML
-    private ListView<Tasks> taskListView;
-
-    private ObservableList<Tasks> tasks;
-    private FilteredList<Tasks> filteredTasks;
-
 
     private Stage dialogStage;
     private Tasks task;
@@ -47,44 +34,24 @@ public class TaskEditDialogController {
 
     @FXML
     private void initialize() {
-        tasks = FXCollections.observableArrayList();
-        filteredTasks = new FilteredList<>(tasks, t -> true);
-        taskListView.setItems(filteredTasks);
-
         setupComboBoxes();
-        setupFilters(); // Configura i filtri
-
-        refreshTasks();
-    }
-
-
-    private void refreshTasks() {
-        try {
-            Tasks filtro = new Tasks();
-            filtro.setIdUtente(MainApp.getCurrentUser().getIdUtente());
-
-            List<Tasks> list = DAOTasks.getInstance().select(filtro);
-            tasks.setAll(list);
-        } catch (DAOException e) {
-            showAlert(Alert.AlertType.ERROR, "Impossibile caricare i task: " + e.getMessage());
-        }
     }
 
     private void setupComboBoxes() {
-        priorityComboBox.getItems().addAll("Priorità", "BASSA", "MEDIA", "ALTA");
+        // Priorità
+        priorityComboBox.getItems().addAll("BASSA", "MEDIA", "ALTA");
         priorityComboBox.getSelectionModel().selectFirst();
 
+        // Categorie
         categoryComboBox.getItems().clear();
         categoryComboBox.getItems().add(new Categorie("Tutte le categorie", -1));
-
         try {
             List<Categorie> listaCategorie = DAOCategorie.getInstance().select(null);
             categoryComboBox.getItems().addAll(listaCategorie);
-        } catch (DAOException e) {
-            showAlert(Alert.AlertType.ERROR, "Errore caricamento categorie: " + e.getMessage());
+        } catch (Exception e) {
+            showAlert(AlertType.ERROR, "Errore caricamento categorie: " + e.getMessage());
         }
 
-        categoryComboBox.setEditable(true);
         categoryComboBox.setConverter(new StringConverter<>() {
             @Override
             public String toString(Categorie c) {
@@ -96,29 +63,9 @@ public class TaskEditDialogController {
                 return new Categorie(string, null);
             }
         });
+
         categoryComboBox.getSelectionModel().selectFirst();
     }
-    private void setupFilters() {
-        categoryComboBox.setOnAction(event -> applyFilters());
-        priorityComboBox.setOnAction(event -> applyFilters());
-    }
-
-    private void applyFilters() {
-        Categorie selectedCategory = categoryComboBox.getValue();
-        String selectedPriority = priorityComboBox.getValue();
-
-        filteredTasks.setPredicate(task -> {
-            boolean categoryMatches = true;
-            if (selectedCategory != null && selectedCategory.getIdCategoria() != null && selectedCategory.getIdCategoria() > 0) {
-                categoryMatches = task.getIdCategoria() != null && task.getIdCategoria().equals(selectedCategory.getIdCategoria());
-            }
-
-            boolean priorityMatches = selectedPriority == null || selectedPriority.equals("Priorità") || task.getPriorita().equals(selectedPriority);
-
-            return categoryMatches && priorityMatches;
-        });
-    }
-
 
     public void setDialogStage(Stage dialogStage) {
         this.dialogStage = dialogStage;
@@ -139,7 +86,16 @@ public class TaskEditDialogController {
         descrizioneField.setText(task.getDescrizione());
         scadenzaField.setValue(DateUtil.parse(task.getScadenza()));
         priorityComboBox.setValue(task.getPriorita());
-
+        if (task.getIdCategoria() != null) {
+            for (Categorie c : categoryComboBox.getItems()) {
+                if (c.getIdCategoria() != null && c.getIdCategoria().equals(task.getIdCategoria())) {
+                    categoryComboBox.setValue(c);
+                    break;
+                }
+            }
+        } else {
+            categoryComboBox.getSelectionModel().selectFirst();
+        }
     }
 
     @FXML
@@ -147,9 +103,14 @@ public class TaskEditDialogController {
         if (isInputValid()) {
             task.setTitolo(titoloField.getText());
             task.setDescrizione(descrizioneField.getText());
-            LocalDate scadenzaLocalDate = scadenzaField.getValue();
-            task.setScadenza(DateUtil.format(scadenzaLocalDate));
+            task.setScadenza(DateUtil.format(scadenzaField.getValue()));
             task.setPriorita(priorityComboBox.getValue());
+            Categorie selectedCategory = categoryComboBox.getValue();
+            if (selectedCategory != null && selectedCategory.getIdCategoria() != -1) {
+                task.setIdCategoria(selectedCategory.getIdCategoria());
+            } else {
+                task.setIdCategoria(null); // O un valore di default
+            }
 
             okClicked = true;
             dialogStage.close();
@@ -161,38 +122,33 @@ public class TaskEditDialogController {
         dialogStage.close();
     }
 
-    // Metodo isInputValid lasciato invariato (ma ora controlla la LocalDate)
     private boolean isInputValid() {
         String errorMessage = "";
 
         if (titoloField.getText() == null || titoloField.getText().isEmpty()) {
             errorMessage += "Titolo non valido!\n";
         }
-        if (descrizioneField.getText() == null || descrizioneField.getText().isEmpty()) {
-            errorMessage += "Descrizione non valida!\n";
-        }
-        // Il controllo del DatePicker è corretto: getValue() torna null se vuoto
-        if (scadenzaField.getValue() == null) {
-            errorMessage += "Data di scadenza non valida!\n";
-        }
+//        if (descrizioneField.getText() == null || descrizioneField.getText().isEmpty()) {
+//            errorMessage += "Descrizione non valida!\n";
+//        }
+//        if (scadenzaField.getValue() == null) {
+//            errorMessage += "Data di scadenza non valida!\n";
+//        }
         if (priorityComboBox.getValue() == null || priorityComboBox.getValue().isEmpty()) {
             errorMessage += "Priorità non valida!\n";
         }
+//        if (categoryComboBox.getSelectionModel().getSelectedItem() == null) {
+//            errorMessage += "Categoria non valida!\n";
+//        }
 
         if (!errorMessage.isEmpty()) {
-            Alert alert = new Alert(AlertType.ERROR);
-            alert.initOwner(dialogStage);
-            alert.setTitle("Campi non validi");
-            alert.setHeaderText("Per favore correggi i campi non validi");
-            alert.setContentText(errorMessage);
-            alert.showAndWait();
+            showAlert(AlertType.ERROR, errorMessage);
             return false;
         }
         return true;
     }
 
-
-    private void showAlert(Alert.AlertType type, String msg) {
+    private void showAlert(AlertType type, String msg) {
         Alert alert = new Alert(type, msg);
         alert.setHeaderText(null);
         alert.showAndWait();

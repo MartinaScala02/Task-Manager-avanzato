@@ -92,28 +92,51 @@ public class DAOTasks implements DAO<Tasks> {
     public void insert(Tasks t) throws DAOException {
         verifyObject(t);
 
-        int completatoInt = (t.getCompletamento() != null && t.getCompletamento()) ? 1 : 0;
-        String idCatVal = "NULL";
-        if (t.getIdCategoria() != null && t.getIdCategoria() > 0) {
-            idCatVal = t.getIdCategoria().toString();
+        Statement st = null;
+        try {
+            // Otteniamo lo Statement per eseguire l'operazione
+            st = DAOMySQLSettings.getStatement();
+
+            int completatoInt = (t.getCompletamento() != null && t.getCompletamento()) ? 1 : 0;
+            String idCatVal = "NULL";
+            if (t.getIdCategoria() != null && t.getIdCategoria() > 0) {
+                idCatVal = t.getIdCategoria().toString();
+            }
+
+            // Sanitizzazione dei campi di testo per prevenire SQL Injection
+            String titoloSafe = t.getTitolo().replace("'", "\\'");
+            String descrizioneSafe = (t.getDescrizione() != null) ? t.getDescrizione().replace("'", "\\'") : "";
+
+            String query = "INSERT INTO Tasks (titolo, descrizione, scadenza, priorità, completamento, idUtente, idCategoria) VALUES ('"
+                    + titoloSafe + "', '"
+                    + descrizioneSafe + "', '"
+                    + t.getScadenza() + "', '"
+                    + t.getPriorita() + "', "
+                    + completatoInt + ", "
+                    + t.getIdUtente() + ", "
+                    + idCatVal + ")";
+
+            logger.info("SQL Insert: " + query);
+
+            // 1. Esegui l'UPDATE richiedendo le chiavi generate
+            st.executeUpdate(query, Statement.RETURN_GENERATED_KEYS);
+
+            // 2. Recupera la chiave generata (idTask)
+            ResultSet rs = st.getGeneratedKeys();
+            if (rs.next()) {
+                int idGenerato = rs.getInt(1);
+                t.setIdTask(idGenerato); // <--- FIX CRUCIALE: Aggiorna l'oggetto Tasks in memoria
+            } else {
+                logger.warning("Nessuna chiave generata per la Task inserita.");
+            }
+
+            if (rs != null) rs.close(); // Chiude il ResultSet
+
+        } catch (SQLException e) {
+            throw new DAOException("Errore Database durante l'insert: " + e.getMessage());
+        } finally {
+            DAOMySQLSettings.closeStatement(st);
         }
-
-        // --- CORREZIONE QUI: .replace("'", "\\'") ---
-        // Se c'è un apostrofo nel testo, lo facciamo diventare \' così SQL non si rompe.
-        String titoloSafe = t.getTitolo().replace("'", "\\'");
-        String descrizioneSafe = (t.getDescrizione() != null) ? t.getDescrizione().replace("'", "\\'") : "";
-
-        String query = "INSERT INTO Tasks (titolo, descrizione, scadenza, priorità, completamento, idUtente, idCategoria) VALUES ('"
-                + titoloSafe + "', '"
-                + descrizioneSafe + "', '"
-                + t.getScadenza() + "', '"
-                + t.getPriorita() + "', "
-                + completatoInt + ", "
-                + t.getIdUtente() + ", "
-                + idCatVal + ")";
-
-        logger.info("SQL Insert: " + query);
-        executeUpdate(query);
     }
 
     @Override

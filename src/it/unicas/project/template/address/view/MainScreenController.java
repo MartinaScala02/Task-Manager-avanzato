@@ -40,11 +40,14 @@ public class MainScreenController {
     private Label usernameLabelHeader;
     @FXML
     private ListView<Tasks> taskListView;
+    @FXML
+    private VBox categoriaContainer;
 
     private MainApp mainApp;
     private boolean isOpen = false;
     private ObservableList<Tasks> tasks;
     private FilteredList<Tasks> filteredTasks;
+
 
     public MainScreenController() {}
 
@@ -54,6 +57,8 @@ public class MainScreenController {
         if (currentUser != null && currentUser.getNome() != null) {
             usernameLabelHeader.setText(currentUser.getNome());
         }
+
+        refreshTasks();
     }
 
     @FXML
@@ -61,18 +66,20 @@ public class MainScreenController {
         Utenti currentUser = MainApp.getCurrentUser();
         if (currentUser != null && currentUser.getNome() != null) {
             usernameLabelHeader.setText(currentUser.getNome());
-        }
 
+        }
 
         tasks = FXCollections.observableArrayList();
         filteredTasks = new FilteredList<>(tasks, t -> true);
         taskListView.setItems(filteredTasks);
 
+        Label emptyLabel = new Label("Non ci sono task");
+        emptyLabel.setStyle("-fx-text-fill: #aaa; -fx-font-size: 16;");
+
         setupComboBoxes();
         setupCellFactory();
         setupFilters(); // Configura i filtri
 
-        refreshTasks();
     }
 
     private void refreshTasks() {
@@ -90,15 +97,16 @@ public class MainScreenController {
 
     private void setupComboBoxes() {
         // Setup Priorità
-        priorityComboBox.getItems().addAll("Priorità", "BASSA", "MEDIA", "ALTA");
+        priorityComboBox.getItems().addAll( "BASSA", "MEDIA", "ALTA");
         priorityComboBox.getSelectionModel().selectFirst();
+        priorityComboBox.setPromptText("Priorità");
+        priorityComboBox.getSelectionModel().clearSelection();
 
         // Setup Categorie
         categoryComboBox.getItems().clear();
 
-        // Dummy category
-        Categorie dummyCat = new Categorie("Tutte le categorie", -1);
-        categoryComboBox.getItems().add(dummyCat);
+//        categoryComboBox.setPromptText("Categoria");
+//        categoryComboBox.getSelectionModel().clearSelection();
 
         try {
             List<Categorie> listaCategorie = DAOCategorie.getInstance().select(null);
@@ -123,12 +131,13 @@ public class MainScreenController {
             }
         });
 
-        categoryComboBox.getSelectionModel().selectFirst();
+        categoryComboBox.setPromptText("Categoria");
+        categoryComboBox.getSelectionModel().clearSelection();
     }
 
     private void setupFilters() {
-        categoryComboBox.setOnAction(event -> applyFilters());
-        priorityComboBox.setOnAction(event -> applyFilters());
+       // categoryComboBox.setOnAction(event -> applyFilters());
+       // priorityComboBox.setOnAction(event -> applyFilters());
     }
 
     private void applyFilters() {
@@ -185,7 +194,9 @@ public class MainScreenController {
                 editItem.setOnAction(e -> handleEditTask(task));
 
                 MenuButton menuButton = new MenuButton("⋮", null, editItem, deleteItem);
-                menuButton.setStyle("-fx-text-fill: white; -fx-font-size: 18px; -fx-padding: 0 10 0 10;");
+                menuButton.getStyleClass().add("task-menu-button");
+                menuButton.setFocusTraversable(false);
+                menuButton.setGraphic(null);
 
                 HBox hbox = new HBox(10);
                 hbox.getChildren().addAll(completeBox, priorityBadge, textLabel, menuButton);
@@ -195,9 +206,13 @@ public class MainScreenController {
                 textLabel.setMaxWidth(Double.MAX_VALUE);
 
                 setGraphic(hbox);
+
+
             }
         });
     }
+
+
 
     private void handleEditTask(Tasks task) {
         boolean okClicked = mainApp.showTasksEditDialog(task);
@@ -214,7 +229,7 @@ public class MainScreenController {
 
 
     private void handleDeleteTask(Tasks task) {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Sei sicuro di voler eliminare questo task?", ButtonType.YES, ButtonType.NO);
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Sei sicuro di voler eliminare questa task?", ButtonType.YES, ButtonType.NO);
         alert.setHeaderText(null);
         alert.showAndWait();
 
@@ -244,6 +259,11 @@ public class MainScreenController {
 
         if (priorita == null || priorita.equals("Priorità")) {
             showAlert(Alert.AlertType.WARNING, "Seleziona una priorità valida.");
+            return;
+        }
+
+        if (scadenza == null) {
+            showAlert(Alert.AlertType.WARNING, "Seleziona una data di scadenza valida.");
             return;
         }
 
@@ -302,8 +322,7 @@ public class MainScreenController {
             priorityComboBox.getSelectionModel().selectFirst();
 
         } catch (DAOException e) {
-            showAlert(Alert.AlertType.ERROR, "Errore salvataggio: " + e.getMessage());
-            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Errore creazione task: ");
         }
     }
 
@@ -348,4 +367,52 @@ public class MainScreenController {
     }
     @FXML
     private void handleExit() { System.exit(0); }
+
+    private void eliminaCategoria(Categorie c) {
+        // 1. Controllo Task esistenti (Va bene come hai fatto, ma meglio controllare ID)
+        boolean haTask = tasks.stream()
+                .anyMatch(t -> t.getIdCategoria() != null && t.getIdCategoria().equals(c.getIdCategoria()));
+
+        if (haTask) {
+            showAlert(Alert.AlertType.WARNING, "Impossibile eliminare: ci sono task collegati a questa categoria.");
+            return;
+        }
+
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Sei sicuro di voler eliminare la categoria '" + c.getNomeCategoria() + "'?", ButtonType.YES, ButtonType.NO);
+        confirm.showAndWait();
+
+        if (confirm.getResult() == ButtonType.YES) {
+            try {
+                // 2. Eliminazione dal Database
+                DAOCategorie.getInstance().delete(c);
+
+                // 3. Aggiornamento UI: Rimuovi dalla ComboBox (IMPORTANTE)
+                categoryComboBox.getItems().remove(c);
+                // Nota: funziona se Categorie implementa correttamente equals() basato sull'ID
+
+                // 4. Aggiornamento UI: Rimuovi dal container laterale
+                // Metodo più sicuro: usa UserData o ID invece del testo della Label
+                categoriaContainer.getChildren().removeIf(node -> {
+                    // Opzione A: Se hai settato node.setUserData(c) quando hai creato la lista
+                    if (node.getUserData() != null && node.getUserData().equals(c)) {
+                        return true;
+                    }
+
+                    // Opzione B (Logica attuale migliorata): Controllo nome + struttura
+                    if (node instanceof HBox) {
+                        HBox h = (HBox) node;
+                        // Controllo che ci siano figli prima di fare get(0) per evitare crash
+                        if (!h.getChildren().isEmpty() && h.getChildren().get(0) instanceof Label) {
+                            Label lbl = (Label) h.getChildren().get(0);
+                            return lbl.getText().equals(c.getNomeCategoria());
+                        }
+                    }
+                    return false;
+                });
+
+            } catch (DAOException ex) {
+                showAlert(Alert.AlertType.ERROR, "Errore eliminazione categoria: " + ex.getMessage());
+            }
+        }
+    }
 }

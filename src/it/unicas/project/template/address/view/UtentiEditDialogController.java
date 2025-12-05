@@ -35,7 +35,8 @@ public class UtentiEditDialogController {
     private boolean okClicked = false;
     private boolean verifyLen = true;
 
-    private void inizialize(){
+    @FXML
+    private void initialize(){
         // Sincronizza i due campi (testo condiviso)
         pswVisibleField.textProperty().bindBidirectional(PasswordField.textProperty());
 
