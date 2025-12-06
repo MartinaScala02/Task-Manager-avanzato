@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.Accordion?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.DatePicker?>
@@ -8,6 +9,7 @@
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
@@ -39,26 +41,47 @@
                         <Label fx:id="usernameLabelHeader" style="-fx-font-size: 13px; -fx-font-weight: bold;" styleClass="label-bright" text="Nome Utente" />
                     </VBox>
                 </HBox>
-
                 <Button onAction="#handleLogout" styleClass="button-logout" text="Logout" />
             </HBox>
-
         </HBox>
     </top>
 
     <left>
         <StackPane alignment="TOP_LEFT">
 
-            <VBox prefWidth="250" spacing="15" styleClass="category-box">
-                <style>-fx-padding: 30 20 20 20; -fx-background-color: #1F162A; -fx-border-color: #3A2C49; -fx-border-width: 0 1 0 0;</style>
+            <VBox prefWidth="260" spacing="10" styleClass="category-box">
+                <style>-fx-padding: 20 10 20 10; -fx-background-color: #1F162A; -fx-border-color: #3A2C49; -fx-border-width: 0 1 0 0;</style>
 
-                <Label style="-fx-opacity: 0.5; -fx-font-size: 11px;" styleClass="label-bright" text="FILTRI RAPIDI" />
+                <Label style="-fx-opacity: 0.5; -fx-font-size: 11px; -fx-padding: 0 0 0 10;" styleClass="label-bright" text="NAVIGAZIONE" />
 
-                <Button maxWidth="Infinity" style="-fx-alignment: CENTER_LEFT;" styleClass="button-menu" text="🏠 Home Tasks" />
-                <Button maxWidth="Infinity" style="-fx-alignment: CENTER_LEFT;" styleClass="button-menu" text="✅ Tasks Completate" />
+                <Accordion>
+                    <panes>
+                        <TitledPane animated="true" text="🏠 Home Tasks">
+                            <content>
+                                <VBox fx:id="categoryMenuContainer" spacing="5" style="-fx-background-color: #2b2236; -fx-padding: 10;" />
+                            </content>
+                        </TitledPane>
+
+                        <TitledPane animated="true" text="📊 Stato Task">
+                            <content>
+                                <VBox spacing="8" style="-fx-background-color: #2b2236; -fx-padding: 10;">
+                                    <Button maxWidth="Infinity" onAction="#handleFilterToDo" style="-fx-alignment: CENTER_LEFT;" styleClass="button-menu" text="📝 Da Fare" />
+<!--                                    <Button maxWidth="Infinity" onAction="#handleFilterInProgress" style="-fx-alignment: CENTER_LEFT;" styleClass="button-menu" text="⏳ In Corso" />-->
+                                    <Button maxWidth="Infinity" onAction="#handleFilterCompleted" style="-fx-alignment: CENTER_LEFT;" styleClass="button-menu" text="✅ Completate" />
+                                </VBox>
+                            </content>
+                        </TitledPane>
+                    </panes>
+                </Accordion>
+
+                <Separator style="-fx-opacity: 0.1; -fx-padding: 10 0;" />
+
+                <Button maxWidth="Infinity" onAction="#handleStatistics" style="-fx-alignment: CENTER_LEFT; -fx-padding: 10 15;" styleClass="button-menu" text="📈 Statistica" />
+                <Button maxWidth="Infinity" onAction="#handleViewSwitch" style="-fx-alignment: CENTER_LEFT; -fx-padding: 10 15;" styleClass="button-menu" text="📅 Visualizzazione" />
+
             </VBox>
 
-            <VBox fx:id="sideMenu" prefWidth="250" spacing="15" styleClass="category-box" translateX="-300">
+            <VBox fx:id="sideMenu" prefWidth="260" spacing="15" styleClass="category-box" translateX="-300">
                 <style>-fx-padding: 30 20 20 20; -fx-background-color: #2b2b2b; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 10, 0, 5, 0);</style>
 
                 <Label style="-fx-opacity: 0.5; -fx-font-size: 11px;" styleClass="label-bright" text="MENU UTENTE" />
@@ -66,13 +89,11 @@
 
                 <VBox spacing="10">
                     <Button maxWidth="Infinity" onAction="#handleProfile" style="-fx-alignment: CENTER_LEFT;" styleClass="button-menu" text="👤 Il mio Profilo" />
-                    <Button maxWidth="Infinity" style="-fx-alignment: CENTER_LEFT;" styleClass="button-menu" text="⚙️ Impostazioni" />
                 </VBox>
-
                 <Region VBox.vgrow="ALWAYS" />
-
                 <Button maxWidth="Infinity" onAction="#handleExit" style="-fx-alignment: CENTER_LEFT;" styleClass="button-menu" text="❌ Esci" />
             </VBox>
+
         </StackPane>
     </left>
 
@@ -90,7 +111,7 @@
 
             <VBox spacing="20" style="-fx-padding: 20 30 30 30;" VBox.vgrow="ALWAYS">
 
-                <ListView fx:id="taskListView" style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 2);" styleClass="list-view" VBox.vgrow="NEVER" />
+                <ListView fx:id="taskListView" style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 2);" styleClass="list-view" VBox.vgrow="ALWAYS" />
 
                 <VBox spacing="15" style="-fx-background-color: #2A1E35; -fx-padding: 20; -fx-background-radius: 12; -fx-border-color: #3F2E51; -fx-border-radius: 12;" styleClass="quick-add-form" VBox.vgrow="NEVER">
 
@@ -107,7 +128,6 @@
                         </VBox>
 
                         <VBox maxWidth="280" minWidth="220" spacing="10">
-
                             <ComboBox fx:id="categoryComboBox" prefHeight="54.0" prefWidth="Infinity" promptText="Categoria" HBox.hgrow="ALWAYS" />
                             <HBox spacing="10">
                                 <DatePicker fx:id="dueDateField" maxHeight="1.7976931348623157E308" minHeight="-Infinity" prefWidth="0.0" promptText="Scadenza" HBox.hgrow="ALWAYS" />

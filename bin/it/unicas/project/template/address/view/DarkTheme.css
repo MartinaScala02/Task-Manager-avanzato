@@ -356,9 +356,48 @@
     -fx-padding: 0;
 }
 
+/*servono perchè altrimenti java fa diventare i filtri grigi*/
+.hyperlink {
+    -fx-text-fill: white;
+}
+.hyperlink:visited {
+    -fx-text-fill: white;
+}
 
 
 
+/* 1. Stile dell'Accordion (il contenitore delle tendine) */
+.accordion .titled-pane {
+    -fx-text-fill: white;
+}
+
+/* La barra del titolo (Home Tasks, Stato Task) */
+.accordion .titled-pane > .title {
+    -fx-background-color: transparent; /* Si fonde con la sidebar #1F162A */
+    -fx-border-color: #3A2C49;         /* Linea separatrice sottile viola scuro */
+    -fx-border-width: 0 0 1 0;         /* Solo sotto */
+    -fx-padding: 10 0 10 0;
+    -fx-font-family: "Segoe UI Light";
+    -fx-font-size: 11pt;
+}
+
+/* Effetto quando passi sopra il titolo della tendina */
+.accordion .titled-pane > .title:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Colore della freccetta (rosa come il tema) */
+.accordion .titled-pane > .title .arrow-button .arrow {
+    -fx-background-color: #F071A7;
+    -fx-mark-color: #F071A7;
+}
+
+/* Il contenuto interno che si apre (la lista dei pulsanti) */
+.accordion .titled-pane > .content {
+    -fx-background-color: #1F162A; /* Stesso colore della sidebar */
+    -fx-border-color: transparent;
+    -fx-padding: 5 0 5 0;
+}
 
 
 
